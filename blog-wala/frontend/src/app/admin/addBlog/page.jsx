@@ -214,6 +214,7 @@ const [isPublished, setIsPublished] = useState(false);
         >
           <option value="QuoreB2B">QuoreB2B</option>
           <option value="Compare Bazar">Compare Bazar</option>
+           <option value="PresonifindB2B">PresonifindB2B</option>
           <option value="Other">Other</option>
         </select>
 
