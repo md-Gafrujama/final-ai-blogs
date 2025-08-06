@@ -9,6 +9,9 @@ import axios from 'axios';
 import Head from 'next/head';
 import BlogItem from '@/Components/BlogItem';
 import { motion } from 'framer-motion';
+import NavbarNew from "@/Components/NavbarNew";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebookF, faTwitter, faGooglePlusG, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 
 const BlogClient = ({ slug }) => {
   const [data, setData] = useState(null);
@@ -215,24 +218,25 @@ const BlogClient = ({ slug }) => {
 
   return (data ? (
     <>
+    <NavbarNew/>
       <Head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData(data)) }}
         />
       </Head>
-      <div className='bg-gray-200 py-5 px-5 md:px-12 lg:px-28'>
+      <div className='bg-gray-200 py-10 px-5 md:px-12 lg:px-28'>
         <div className='flex justify-between items-center'>
-          <Link href='/'>
+          {/* <Link href='/'>
             <Image src={assets.logo} width={180} alt='' className='w-[130px] sm:w-auto' />
-          </Link>
-          <button className='flex items-center gap-2 font-medium py-1 px-3 sm:py-3 sm:px-6 border border-black shadow-[-7px_7px_0px_#000000]'>
+          </Link> */}
+          {/* <button className='flex items-center gap-2 font-medium py-1 px-3 sm:py-3 sm:px-6 border border-black shadow-[-7px_7px_0px_#000000]'>
             Get started <Image src={assets.arrow} alt='' />
-          </button>
+          </button> */}
         </div>
-        <div className='text-center my-24'>
+        <div className='text-center my-44'>
           <h1 className='text-2xl sm:text-5xl font-semibold max-w-[700px] mx-auto'>{data.title}</h1>
-          <Image className='mx-auto mt-6 border border-white rounded-full' src={data.authorImg} width={60} height={60} alt='' />
+          {/* <Image className='mx-auto mt-6 border border-white rounded-full' src={data.authorImg} width={60} height={60} alt='' /> */}
           <p className='mt-1 pb-2 text-lg max-w-[740px] mx-auto'>{data.author}</p>
         </div>
       </div>
@@ -278,7 +282,7 @@ const BlogClient = ({ slug }) => {
         </div>
         {/* Email Subscription Section */}
         <div className="max-w-2xl mx-auto my-16">
-          <h3 className="text-xl font-semibold mb-4">Subscribe to our newsletter</h3>
+          <h3 className="text-xl font-semibold mb-4 text-center">Subscribe to our newsletter</h3>
           {/* Email subscription form */}
           <form 
             onSubmit={onSubmitHandler} 
@@ -318,44 +322,48 @@ const BlogClient = ({ slug }) => {
             </div>
           )}
         </div>
-        {/* Share Section */}
-        <div className='my-24'>
-          <p className='text-black font-semibold my-4'>Share this article on social media</p>
-          <div className='flex gap-2'>
-            {/* Facebook Share */}
-            <button
-              onClick={() => handleSocialShare('facebook')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on Facebook"
-            >
-              <Image src={assets.facebook_icon} width={50} alt='Share on Facebook' />
-            </button>
-            {/* Twitter Share */}
-            <button
-              onClick={() => handleSocialShare('twitter')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on Twitter"
-            >
-              <Image src={assets.twitter_icon} width={50} alt='Share on Twitter' />
-            </button>
-            {/* LinkedIn Share */}
-            <button
-              onClick={() => handleSocialShare('linkedin')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on LinkedIn"
-            >
-              <Image src={assets.linkedin_icon} width={35} alt='Share on LinkedIn' />
-            </button>
-            {/* Google Plus Share */}
-            <button
-              onClick={() => handleSocialShare('googleplus')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on Google Plus"
-            >
-              <Image src={assets.googleplus_icon} width={50} alt='Share on Google Plus' />
-            </button>
-          </div>
-        </div>
+{/* Share Section */}
+<div className='my-24 text-center'>
+  <p className='text-black font-semibold my-4'>Share this article on social media</p>
+  <div className='flex justify-center gap-4'>
+    {/* Facebook */}
+    <button
+      onClick={() => handleSocialShare('facebook')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-blue-600 text-2xl"
+      title="Share on Facebook"
+    >
+      <FontAwesomeIcon icon={faFacebookF} />
+    </button>
+
+    {/* Twitter */}
+    <button
+      onClick={() => handleSocialShare('twitter')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-sky-500 text-2xl"
+      title="Share on Twitter"
+    >
+      <FontAwesomeIcon icon={faTwitter} />
+    </button>
+
+    {/* Google Plus */}
+    <button
+      onClick={() => handleSocialShare('googleplus')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-red-600 text-2xl"
+      title="Share on Google Plus"
+    >
+      <FontAwesomeIcon icon={faGooglePlusG} />
+    </button>
+
+    {/* LinkedIn */}
+    <button
+      onClick={() => handleSocialShare('linkedin')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-blue-800 text-2xl"
+      title="Share on LinkedIn"
+    >
+      <FontAwesomeIcon icon={faLinkedinIn} />
+    </button>
+  </div>
+</div>
+
         {/* You may also like section */}
 {relatedBlogs.length > 0 && (
   <section className="my-24 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -364,7 +372,7 @@ const BlogClient = ({ slug }) => {
     </h2>
 
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10"
+      className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-6"
       initial="hidden"
       animate="visible"
       variants={{

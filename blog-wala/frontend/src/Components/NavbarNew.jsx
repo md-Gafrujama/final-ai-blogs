@@ -172,11 +172,11 @@ const NavbarNew = () => {
               onClick={() => router.push('/')}
             >
               <div className="relative">
-                <Image
-                  src={assets.logo}
-                  alt="Quore Logo"
-                  className="w-32 sm:w-44 group-hover:scale-105 transition-transform duration-300"
-                />
+            <Image
+              src={assets.logo}
+              alt="Quore Logo"
+              className="w-6 sm:w-16 group-hover:scale-105 transition-transform duration-300"
+            />
               </div>
             </div>
 

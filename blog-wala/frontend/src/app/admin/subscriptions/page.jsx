@@ -65,7 +65,7 @@ const Page = () => {
             <tr>
               <th scope="col" className="px-5 py-4">Email</th>
               <th scope="col" className="px-5 py-4 hidden sm:table-cell">Date Subscribed</th>
-              <th scope="col" className="px-5 py-4 text-right">Action</th>
+              <th scope="col" className="px-5 py-4">Action</th>
             </tr>
           </thead>
           <tbody>

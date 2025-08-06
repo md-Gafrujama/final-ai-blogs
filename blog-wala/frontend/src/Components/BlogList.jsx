@@ -8,7 +8,7 @@ import BlogItem from '@/Components/BlogItem';
 const AppContext = createContext();
 
 // Blog categories
-const blogCategories = ["All", "Technology", "Startup", "Lifestyle"];
+const blogCategories = ["All", "ABM", "Advertising", "Content Creation", "Demand Generation", "Intent Data", "Sales"];
 
 // Enhanced BlogCard component with React design
 const BlogCard = ({ blog }) => {

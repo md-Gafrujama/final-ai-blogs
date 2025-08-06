@@ -195,11 +195,14 @@ const [isPublished, setIsPublished] = useState(false);
           name="category"
           onChange={onChangeHandler}
           value={data.category}
-          className="w-40 mt-2 px-4 py-3 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-40 mt-2 px-4 py-3 border border-gray-300 rounded-lg text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 hover:border-blue-400 hover:shadow-lg hover:bg-blue-50 transition-all duration-300 ease-in-out"
         >
-          <option value="Startup">Startup</option>
-          <option value="Technology">Technology</option>
-          <option value="Lifestyle">Lifestyle</option>
+          <option value="ABM">ABM</option>
+          <option value="Advertising">Advertising</option>
+          <option value="Content Creation">Content Creation</option>
+          <option value="Demand Generation">Demand Generation</option>
+          <option value="Intent Data">Intent Data</option>
+          <option value="Sales">Sales</option>
         </select>
 
         <p className="text-lg font-medium text-gray-700 mt-6">Company</p>
@@ -207,7 +210,7 @@ const [isPublished, setIsPublished] = useState(false);
           name="company"
           onChange={onChangeHandler}
           value={data.company}
-          className="w-40 mt-2 px-4 py-3 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-40 mt-2 px-4 py-3 border border-gray-300 rounded-lg text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 hover:border-blue-400 hover:shadow-lg hover:bg-blue-50 transition-all duration-300 ease-in-out"
         >
           <option value="QuoreB2B">QuoreB2B</option>
           <option value="Compare Bazar">Compare Bazar</option>
