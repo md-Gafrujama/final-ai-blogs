@@ -372,48 +372,49 @@ const BlogClient = ({ slug }) => {
     </h2>
 
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-6"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
       initial="hidden"
       animate="visible"
       variants={{
         hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: 0.15,
-          },
-        },
+        visible: { transition: { staggerChildren: 0.15 } },
       }}
     >
-      {relatedBlogs.map((blog, index) => (
-        <motion.div
+      {relatedBlogs.map((blog) => (
+        <motion.button
           key={blog.slug}
+          whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(99, 102, 241, 0.09)" }}
           variants={{
-            hidden: { opacity: 0, y: 20 },
+            hidden: { opacity: 0, y: 35 },
             visible: { opacity: 1, y: 0 },
           }}
-          whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
-          className="cursor-pointer rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-shadow duration-300 bg-white"
           onClick={() => window.location.href = `/blogs/${blog.slug}`}
           tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') window.location.href = `/blogs/${blog.slug}`;
-          }}
-          role="link"
+          className="block focus:outline-none bg-gradient-to-br from-white to-gray-50 rounded-3xl overflow-hidden shadow-lg border border-gray-100 transition-all duration-350 hover:shadow-2xl"
           aria-label={`Read blog titled ${blog.title}`}
         >
-          {/* Assuming BlogItem already styles the card */}
-          <BlogItem
-            title={blog.title}
-            description={blog.description}
-            category={blog.category}
-            image={blog.image}
-            slug={blog.slug}
-          />
-        </motion.div>
+          <div className="relative h-40 w-full overflow-hidden">
+            <img
+              src={blog.image}
+              alt={blog.title}
+              className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+            />
+            <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-xl shadow">
+              {blog.category}
+            </span>
+          </div>
+          <div className="px-6 py-5 flex flex-col h-full">
+            <h3 className="text-xl font-semibold mb-1 text-gray-800 line-clamp-1">{blog.title}</h3>
+            <div className="h-1 w-12 mb-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></div>
+            <p className="text-gray-600 text-sm line-clamp-2 mb-2">{blog.description}</p>
+          </div>
+        </motion.button>
       ))}
     </motion.div>
   </section>
 )}
+
 
       </div>
       <Footer />
