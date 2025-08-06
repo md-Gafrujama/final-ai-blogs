@@ -172,7 +172,7 @@ const BlogList = () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/all`);
      
-      const filteredBlogs = response.data.blogs.filter(blog => blog.company === 'PresonifindB2B');
+      const filteredBlogs = response.data.blogs.filter(blog => blog.company === 'Compare Bazar');
       setBlogs(filteredBlogs);
       setSearchResults(filteredBlogs);
     } catch (error) {

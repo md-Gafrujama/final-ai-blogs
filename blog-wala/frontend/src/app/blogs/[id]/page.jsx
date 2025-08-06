@@ -152,3 +152,6 @@ export default function Page({ params }) {
   // Pass slug to BlogClient for client-side logic
   return <BlogClient slug={params.id} />;
 }
+
+
+
