@@ -22,7 +22,7 @@ const [isPublished, setIsPublished] = useState(false);
   const [data, setData] = useState({
     title: '',
     description: '',
-    category: 'Startup',
+    category: 'ABM',
     author: 'Alex Bennett',
     authorImg: '/author_img.png',
     company: 'QuoreB2B',
