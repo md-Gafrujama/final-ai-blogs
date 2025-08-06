@@ -171,8 +171,10 @@ const BlogList = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/all`);
-      setBlogs(response.data.blogs);
-      setSearchResults(response.data.blogs);
+     
+      const filteredBlogs = response.data.blogs.filter(blog => blog.company === 'QuoreB2B');
+      setBlogs(filteredBlogs);
+      setSearchResults(filteredBlogs);
     } catch (error) {
       console.error('Error fetching blogs:', error);
     } finally {

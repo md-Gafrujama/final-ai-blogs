@@ -41,7 +41,7 @@ export const AppProvider = ({ children }) => {
 
     const fetchBlogs = async () => {
         try {
-            const { data } = await axios.get(`${baseURL}/api/blog/all`);
+            const { data } = await axios.get(`${baseURL}/api/admin/blogs?company=QuoreB2B`);
             if (data.success) {
                 // Filter to ensure only published blogs are shown
                 const publishedBlogs = data.blogs.filter(blog => blog.isPublished !== false);

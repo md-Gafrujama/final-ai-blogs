@@ -78,7 +78,7 @@ const BlogClient = ({ slug }) => {
     if (!slug) return;
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/slug/${slug}`);
-      if (response.data.success) {
+      if (response.data.success && response.data.blog && response.data.blog.company === "QuoreB2B") {
         setData(response.data.blog);
       } else {
         // Blog not found or unpublished
