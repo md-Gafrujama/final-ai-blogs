@@ -202,9 +202,9 @@ const BlogClient = ({ slug }) => {
         try {
           const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/all`);
           if (response.data.success) {
-            // Filter by same category, exclude current blog, limit to 3
+            // Filter by same category, exclude current blog, limit to 3 and same company
             const related = response.data.blogs.filter(
-              (b) => b.category === data.category && b.slug !== data.slug && b.isPublished !== false
+              (b) => b.category === data.category && b.slug !== data.slug && b.isPublished !== false && b.company === "QuoreB2B"
             ).slice(0, 3);
             setRelatedBlogs(related);
           }

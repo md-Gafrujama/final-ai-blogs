@@ -168,6 +168,20 @@ const [isPublished, setIsPublished] = useState(false);
           required
         />
 
+        {/* Author Section */}
+        <div className="mt-6">
+          <p className="text-lg font-medium text-gray-700">Author</p>
+          <input
+            name="author"
+            onChange={onChangeHandler}
+            value={data.author}
+            className="w-full max-w-xl mt-2 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            placeholder="Author name..."
+            required
+          />
+        </div>
+
         {/* Blog Description (Quill) */}
         <p className="text-lg font-medium text-gray-700 mt-6">Blog Description</p>
         <div className="max-w-xl min-h-[300px] relative mt-2 rounded-lg border border-gray-300 px-3 py-3">

@@ -349,7 +349,14 @@ const BlogList = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <BlogCard blog={item} />
+                  <BlogItem 
+                    title={item.title}
+                    description={item.description}
+                    category={item.category}
+                    image={item.image}
+                    slug={item.slug || item._id}
+                    author={item.author}
+                  />
                 </motion.div>
               ))
             ) : (
