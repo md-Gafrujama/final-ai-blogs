@@ -238,6 +238,23 @@ const BlogClient = ({ slug }) => {
           <h1 className='text-2xl sm:text-5xl font-semibold max-w-[700px] mx-auto'>{data.title}</h1>
           {/* <Image className='mx-auto mt-6 border border-white rounded-full' src={data.authorImg} width={60} height={60} alt='' /> */}
           <p className='mt-1 pb-2 text-lg max-w-[740px] mx-auto'>{data.author}</p>
+          {/* Blog date and time */}
+          <div className='mt-2 text-sm text-gray-600 max-w-[740px] mx-auto'>
+            <span className='inline-flex items-center gap-1'>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Published on {new Date(data.createdAt || data.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })} at {new Date(data.createdAt || data.date).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })}
+            </span>
+          </div>
         </div>
       </div>
       <div className='mx-5 max-w-[800px] md:mx-auto mt-[-100px] mb-10'>
