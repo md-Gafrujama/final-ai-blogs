@@ -8,6 +8,10 @@ const Schema = new mongoose.Schema({
     date:{
         type:Date,
         default:Date.now()
+    },
+    company:{
+        type:String,
+        required:true
     }
 })
 

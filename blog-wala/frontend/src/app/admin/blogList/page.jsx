@@ -20,8 +20,14 @@ const ListBlog = () => {
        });
       console.log('API response:', data);
       if (data.success) {
-        setBlogs(data.blogs);
-        console.log('Blogs set:', data.blogs);
+        // Sort blogs by createdAt in descending order (newest first)
+        const sortedBlogs = data.blogs.sort((a, b) => {
+          const dateA = new Date(a.createdAt || a.date);
+          const dateB = new Date(b.createdAt || b.date);
+          return dateB - dateA;
+        });
+        setBlogs(sortedBlogs);
+        console.log('Blogs set:', sortedBlogs);
       } else {
         toast.error(data.message || 'Failed to fetch blogs');
       }

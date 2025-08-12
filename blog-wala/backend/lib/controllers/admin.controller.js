@@ -27,7 +27,7 @@ export const getAllBlogsAdmin = async (req, res) => {
             filter.company = company;
         }
         
-        const blogs = await Blog.find(filter).sort({createdAt: -1});
+        const blogs = await Blog.find(filter).sort({createdAt: -1}).limit(5);
         res.json({success: true, blogs, company: company || 'all'})
     } catch (error) {
         res.json({success: false, message: error.message})

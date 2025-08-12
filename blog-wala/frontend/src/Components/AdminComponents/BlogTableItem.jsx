@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 const BlogTableItem = ({ blog, fetchBlogs, index }) => {
     const router = useRouter();
     const isPublished = blog.isPublished;
-    const BlogDate = blog.date ? new Date(blog.date) : null;
+    const BlogDate = blog.createdAt ? new Date(blog.createdAt) : (blog.date ? new Date(blog.date) : null);
     const { axios } = useAppContext();
 
     const handlePublish = async () => {

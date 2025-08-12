@@ -53,7 +53,10 @@ const [isPublished, setIsPublished] = useState(false);
   }, [])
 
   const generateContent = async () => {
-    if (!data.title) return toast.error('Please enter a title')
+    if (!data.title) {
+      toast.error('Please enter a title');
+      return;
+    }
 
     try {
       setLoading(true)
@@ -81,10 +84,11 @@ const [isPublished, setIsPublished] = useState(false);
         
         toast.success('AI content generated successfully!');
       } else {
-        toast.error(response.data.message)
+        toast.error(response.data.message || 'Failed to generate content');
       }
     } catch (error) {
-      toast.error(error.message)
+      console.error('Generate content error:', error);
+      toast.error(error?.response?.data?.message || error.message || 'Failed to generate content');
     } finally {
       setLoading(false)
     }
@@ -121,13 +125,16 @@ const [isPublished, setIsPublished] = useState(false);
       console.log("After API call", response);
       if (response.data.success) {
         toast.success('Blog added successfully!');
-        router.push('/admin/blogList');
-        // reset form...
+        // Add a small delay before navigation to ensure toast is visible
+        setTimeout(() => {
+          router.push('/admin/blogList');
+        }, 1500);
       } else {
-        toast.error('Something went wrong');
+        toast.error(response.data.message || 'Something went wrong');
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      console.error('Submit error:', error);
+      toast.error(error?.response?.data?.message || error.message || 'Failed to add blog');
     }
   };
 

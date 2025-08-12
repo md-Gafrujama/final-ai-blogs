@@ -59,19 +59,20 @@ const Page = () => {
     <div className="flex-1 px-4 sm:px-10 pt-6 sm:pt-12 bg-blue-50/40 min-h-screen">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">Subscriber List</h1>
 
-      <div className="relative max-w-3xl overflow-x-auto bg-white border border-gray-200 shadow rounded-xl scrollbar-hide">
-        <table className="w-full text-sm text-left text-gray-600">
-          <thead className="text-xs uppercase bg-gray-100 text-gray-500 rounded-t-xl">
-            <tr>
-              <th scope="col" className="px-5 py-4">Email</th>
-              <th scope="col" className="px-5 py-4 hidden sm:table-cell">Date Subscribed</th>
-              <th scope="col" className="px-5 py-4">Action</th>
-            </tr>
-          </thead>
+             <div className="relative max-w-4xl overflow-x-auto bg-white border border-gray-200 shadow rounded-xl scrollbar-hide">
+         <table className="w-full text-sm text-left text-gray-600">
+           <thead className="text-xs uppercase bg-gray-100 text-gray-500 rounded-t-xl">
+             <tr>
+               <th scope="col" className="px-5 py-4 w-1/3">Email</th>
+               <th scope="col" className="px-5 py-4 hidden sm:table-cell w-1/4">Date Subscribed</th>
+               <th scope="col" className="px-5 py-4 hidden sm:table-cell w-1/4">Company</th>
+               <th scope="col" className="px-5 py-4 w-1/6">Action</th>
+             </tr>
+           </thead>
           <tbody>
             {emails.length === 0 ? (
               <tr>
-                <td colSpan={3} className="text-center text-gray-400 py-10">
+                <td colSpan={4} className="text-center text-gray-400 py-10">
                   No subscriptions found
                 </td>
               </tr>
@@ -83,6 +84,7 @@ const Page = () => {
                   deleteEmail={deleteEmail}
                   email={item.email}
                   date={item.date}
+                  company={item.company}
                 />
               ))
             )}
