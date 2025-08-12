@@ -64,15 +64,14 @@ const Page = () => {
           <thead className="text-xs uppercase bg-gray-100 text-gray-500 rounded-t-xl">
             <tr>
               <th scope="col" className="px-5 py-4">Email</th>
-              <th scope="col" className="px-5 py-4">Company</th>
               <th scope="col" className="px-5 py-4 hidden sm:table-cell">Date Subscribed</th>
-              <th scope="col" className="px-5 py-4 text-right ">Action</th>
+              <th scope="col" className="px-5 py-4">Action</th>
             </tr>
           </thead>
           <tbody>
             {emails.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center text-gray-400 py-10">
+                <td colSpan={3} className="text-center text-gray-400 py-10">
                   No subscriptions found
                 </td>
               </tr>
@@ -81,11 +80,9 @@ const Page = () => {
                 <SubsTableItem
                   key={item._id}
                   mongoId={item._id}
-                  deleteEmail={()=>deleteEmail(item._id)}
+                  deleteEmail={deleteEmail}
                   email={item.email}
-                  company={item.company}
                   date={item.date}
-                 
                 />
               ))
             )}

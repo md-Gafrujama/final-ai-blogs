@@ -47,15 +47,25 @@ export const getDashboard = async (req, res) =>{
     try {
         const recentBlogs = await Blog.find({}).sort({ createdAt: -1 }).limit(5);
         const blogs = await Blog.countDocuments();
-        const comments = await Comment.countDocuments()
-        const drafts = await Blog.countDocuments({isPublished: false})
+        const comments = await Comment.countDocuments();
+        const drafts = await Blog.countDocuments({isPublished: false});
+
+        // Dynamic company blog counts
+        const companyCounts = await Blog.aggregate([
+          { $group: { _id: "$company", count: { $sum: 1 } } }
+        ]);
+        const companyBlogCounts = {};
+        companyCounts.forEach(item => {
+          companyBlogCounts[item._id] = item.count;
+        });
 
         const dashboardData = {
-            blogs, comments, drafts, recentBlogs
-        }
-        res.json({success: true, dashboardData})
+            blogs, comments, drafts, recentBlogs,
+            companyBlogCounts
+        };
+        res.json({success: true, dashboardData});
     } catch (error) {
-        res.json({success: false, message: error.message})
+        res.json({success: false, message: error.message});
     }
 }
 
@@ -82,7 +92,7 @@ export const approveCommentById = async (req, res) =>{
 export const getAllEmails = async (req, res) => {
     try {
         const emails = await EmailModel.find({}).sort({date: -1});
-        res.json({success: true, emails })
+        res.json({success: true, emails})
     } catch (error) {
         res.json({success: false, message: error.message})
     }

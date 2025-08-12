@@ -5,11 +5,6 @@ const Schema = new mongoose.Schema({
         type:String,
         required:true
     },
-    company:{
-        type:String,
-        required:true,
-        default: "Unknown"
-    },
     date:{
         type:Date,
         default:Date.now()

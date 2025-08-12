@@ -9,6 +9,9 @@ import axios from 'axios';
 import Head from 'next/head';
 import BlogItem from '@/Components/BlogItem';
 import { motion } from 'framer-motion';
+import NavbarNew from "@/Components/NavbarNew";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebookF, faTwitter, faGooglePlusG, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 
 const BlogClient = ({ slug }) => {
   const [data, setData] = useState(null);
@@ -75,7 +78,7 @@ const BlogClient = ({ slug }) => {
     if (!slug) return;
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/slug/${slug}`);
-      if (response.data.success) {
+      if (response.data.success && response.data.blog && response.data.blog.company === "QuoreB2B") {
         setData(response.data.blog);
       } else {
         // Blog not found or unpublished
@@ -159,7 +162,6 @@ const BlogClient = ({ slug }) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("email", email);
-    formData.append("company", data?.company || "Blog Page"); // Use blog's company or default
     try {
       const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
       const response = await axios.post(`${baseURL}/api/email`, formData);
@@ -200,9 +202,9 @@ const BlogClient = ({ slug }) => {
         try {
           const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/all`);
           if (response.data.success) {
-            // Filter by same category, exclude current blog, limit to 3
+            // Filter by same category, exclude current blog, limit to 3 and same company
             const related = response.data.blogs.filter(
-              (b) => b.category === data.category && b.slug !== data.slug && b.isPublished !== false
+              (b) => b.category === data.category && b.slug !== data.slug && b.isPublished !== false && b.company === "QuoreB2B"
             ).slice(0, 3);
             setRelatedBlogs(related);
           }
@@ -216,25 +218,43 @@ const BlogClient = ({ slug }) => {
 
   return (data ? (
     <>
+    <NavbarNew/>
       <Head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData(data)) }}
         />
       </Head>
-      <div className='bg-gray-200 py-5 px-5 md:px-12 lg:px-28'>
+      <div className='bg-gray-200 py-10 px-5 md:px-12 lg:px-28'>
         <div className='flex justify-between items-center'>
-          <Link href='/'>
+          {/* <Link href='/'>
             <Image src={assets.logo} width={180} alt='' className='w-[130px] sm:w-auto' />
-          </Link>
-          <button className='flex items-center gap-2 font-medium py-1 px-3 sm:py-3 sm:px-6 border border-black shadow-[-7px_7px_0px_#000000]'>
+          </Link> */}
+          {/* <button className='flex items-center gap-2 font-medium py-1 px-3 sm:py-3 sm:px-6 border border-black shadow-[-7px_7px_0px_#000000]'>
             Get started <Image src={assets.arrow} alt='' />
-          </button>
+          </button> */}
         </div>
-        <div className='text-center my-24'>
+        <div className='text-center my-44'>
           <h1 className='text-2xl sm:text-5xl font-semibold max-w-[700px] mx-auto'>{data.title}</h1>
-          <Image className='mx-auto mt-6 border border-white rounded-full' src={data.authorImg} width={60} height={60} alt='' />
+          {/* <Image className='mx-auto mt-6 border border-white rounded-full' src={data.authorImg} width={60} height={60} alt='' /> */}
           <p className='mt-1 pb-2 text-lg max-w-[740px] mx-auto'>{data.author}</p>
+          {/* Blog date and time */}
+          <div className='mt-2 text-sm text-gray-600 max-w-[740px] mx-auto'>
+            <span className='inline-flex items-center gap-1'>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Published on {new Date(data.createdAt || data.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })} at {new Date(data.createdAt || data.date).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })}
+            </span>
+          </div>
         </div>
       </div>
       <div className='mx-5 max-w-[800px] md:mx-auto mt-[-100px] mb-10'>
@@ -279,7 +299,7 @@ const BlogClient = ({ slug }) => {
         </div>
         {/* Email Subscription Section */}
         <div className="max-w-2xl mx-auto my-16">
-          <h3 className="text-xl font-semibold mb-4">Subscribe to our newsletter</h3>
+          <h3 className="text-xl font-semibold mb-4 text-center">Subscribe to our newsletter</h3>
           {/* Email subscription form */}
           <form 
             onSubmit={onSubmitHandler} 
@@ -319,44 +339,48 @@ const BlogClient = ({ slug }) => {
             </div>
           )}
         </div>
-        {/* Share Section */}
-        <div className='my-24'>
-          <p className='text-black font-semibold my-4'>Share this article on social media</p>
-          <div className='flex gap-2'>
-            {/* Facebook Share */}
-            <button
-              onClick={() => handleSocialShare('facebook')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on Facebook"
-            >
-              <Image src={assets.facebook_icon} width={50} alt='Share on Facebook' />
-            </button>
-            {/* Twitter Share */}
-            <button
-              onClick={() => handleSocialShare('twitter')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on Twitter"
-            >
-              <Image src={assets.twitter_icon} width={50} alt='Share on Twitter' />
-            </button>
-            {/* LinkedIn Share */}
-            <button
-              onClick={() => handleSocialShare('linkedin')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on LinkedIn"
-            >
-              <Image src={assets.linkedin_icon} width={35} alt='Share on LinkedIn' />
-            </button>
-            {/* Google Plus Share */}
-            <button
-              onClick={() => handleSocialShare('googleplus')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              title="Share on Google Plus"
-            >
-              <Image src={assets.googleplus_icon} width={50} alt='Share on Google Plus' />
-            </button>
-          </div>
-        </div>
+{/* Share Section */}
+<div className='my-24 text-center'>
+  <p className='text-black font-semibold my-4'>Share this article on social media</p>
+  <div className='flex justify-center gap-4'>
+    {/* Facebook */}
+    <button
+      onClick={() => handleSocialShare('facebook')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-blue-600 text-2xl"
+      title="Share on Facebook"
+    >
+      <FontAwesomeIcon icon={faFacebookF} />
+    </button>
+
+    {/* Twitter */}
+    <button
+      onClick={() => handleSocialShare('twitter')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-sky-500 text-2xl"
+      title="Share on Twitter"
+    >
+      <FontAwesomeIcon icon={faTwitter} />
+    </button>
+
+    {/* Google Plus */}
+    <button
+      onClick={() => handleSocialShare('googleplus')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-red-600 text-2xl"
+      title="Share on Google Plus"
+    >
+      <FontAwesomeIcon icon={faGooglePlusG} />
+    </button>
+
+    {/* LinkedIn */}
+    <button
+      onClick={() => handleSocialShare('linkedin')}
+      className="hover:opacity-80 transition-opacity cursor-pointer text-blue-800 text-2xl"
+      title="Share on LinkedIn"
+    >
+      <FontAwesomeIcon icon={faLinkedinIn} />
+    </button>
+  </div>
+</div>
+
         {/* You may also like section */}
 {relatedBlogs.length > 0 && (
   <section className="my-24 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -365,48 +389,49 @@ const BlogClient = ({ slug }) => {
     </h2>
 
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
       initial="hidden"
       animate="visible"
       variants={{
         hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: 0.15,
-          },
-        },
+        visible: { transition: { staggerChildren: 0.15 } },
       }}
     >
-      {relatedBlogs.map((blog, index) => (
-        <motion.div
+      {relatedBlogs.map((blog) => (
+        <motion.button
           key={blog.slug}
+          whileHover={{ scale: 1.04, boxShadow: "0 8px 32px 0 rgba(99, 102, 241, 0.09)" }}
           variants={{
-            hidden: { opacity: 0, y: 20 },
+            hidden: { opacity: 0, y: 35 },
             visible: { opacity: 1, y: 0 },
           }}
-          whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
-          className="cursor-pointer rounded-3xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-shadow duration-300 bg-white"
           onClick={() => window.location.href = `/blogs/${blog.slug}`}
           tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') window.location.href = `/blogs/${blog.slug}`;
-          }}
-          role="link"
+          className="block focus:outline-none bg-gradient-to-br from-white to-gray-50 rounded-3xl overflow-hidden shadow-lg border border-gray-100 transition-all duration-350 hover:shadow-2xl"
           aria-label={`Read blog titled ${blog.title}`}
         >
-          {/* Assuming BlogItem already styles the card */}
-          <BlogItem
-            title={blog.title}
-            description={blog.description}
-            category={blog.category}
-            image={blog.image}
-            slug={blog.slug}
-          />
-        </motion.div>
+          <div className="relative h-40 w-full overflow-hidden">
+            <img
+              src={blog.image}
+              alt={blog.title}
+              className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+            />
+            <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-xl shadow">
+              {blog.category}
+            </span>
+          </div>
+          <div className="px-6 py-5 flex flex-col h-full">
+            <h3 className="text-xl font-semibold mb-1 text-gray-800 line-clamp-1">{blog.title}</h3>
+            <div className="h-1 w-12 mb-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></div>
+            <p className="text-gray-600 text-sm line-clamp-2 mb-2">{blog.description}</p>
+          </div>
+        </motion.button>
       ))}
     </motion.div>
   </section>
 )}
+
 
       </div>
       <Footer />
