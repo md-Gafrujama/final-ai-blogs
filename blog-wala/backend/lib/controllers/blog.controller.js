@@ -245,12 +245,14 @@ export const subscribeEmail = async (req, res) => {
     console.log('Request headers:', req.headers);
     
     // Handle both FormData and JSON
-    let email;
+    let email, company;
     if (req.body && req.body.email) {
       email = req.body.email;
+      company = req.body.company || "Unknown";
     } else if (req.body && typeof req.body === 'object') {
       // Try to get email from form data
       email = req.body.email || req.body.get?.('email');
+      company = req.body.company || req.body.get?.('company') || "Unknown";
     } else {
       return res.json({ success: false, message: "Email is required" });
     }
@@ -265,7 +267,7 @@ export const subscribeEmail = async (req, res) => {
       return res.json({ success: false, message: "Email already subscribed" });
     }
     
-    await EmailModel.create({ email });
+    await EmailModel.create({ email, company });
     res.json({ success: true, msg: "Email subscribed successfully" });
   } catch (error) {
     console.error('Subscribe email error:', error);
