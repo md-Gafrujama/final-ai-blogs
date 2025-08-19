@@ -4,6 +4,11 @@ import Blog from '../models/BlogModel.js';
 import Comment from '../models/CommentModel.js';
 import EmailModel from '../models/EmailModel.js';
 import main from '../config/gemini.js';
+import emailService from '../config/nodemailer.js';
+
+function escapeRegex(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // Helper function to slugify the blog title
 function slugify(text) {
@@ -52,7 +57,49 @@ export const addBlog = async (req, res) => {
     const image = optimizedImageUrl;
     const slug = slugify(title);
 
-    await Blog.create({ title, description, category, author, authorImg, image, slug, company, isPublished: isPublished === 'true' });
+    const created = await Blog.create({ title, description, category, author, authorImg, image, slug, company, isPublished: isPublished === 'true' });
+
+    // Send newsletter only if the blog is published at creation time
+    if (created.isPublished) {
+      try {
+        const companyPattern = new RegExp(`^${escapeRegex(created.company)}$`, 'i');
+        const subscribers = await EmailModel.find({ company: companyPattern }).lean();
+        const recipientEmails = subscribers.map(s => s.email).filter(Boolean);
+
+        console.log('📰 Newsletter recipients (create):', recipientEmails.length, 'company:', created.company);
+        console.log('📰 Recipient emails:', recipientEmails);
+        console.log('📰 SMTP_USER configured:', !!process.env.SMTP_USER);
+        console.log('📰 FROM_EMAIL configured:', !!process.env.FROM_EMAIL);
+        
+        if (recipientEmails.length > 0 && process.env.SMTP_USER) {
+          const siteBaseUrl = process.env.SITE_BASE_URL || 'https://example.com';
+          const blogUrl = `${siteBaseUrl}/blogs/${created.slug}`;
+
+          const msg = {
+            to: recipientEmails,
+            from: process.env.FROM_EMAIL || 'no-reply@example.com',
+            subject: `New blog: ${created.title}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                <h2 style="margin: 0 0 12px;">${created.title}</h2>
+                <p style="margin: 0 0 12px;">${created.description?.slice(0, 180) || ''}...</p>
+                <p style="margin: 0 0 12px;">
+                  <a href="${blogUrl}" target="_blank" rel="noopener noreferrer">Read the full post</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;"/>
+                <p style="font-size: 12px; color: #666;">You received this because you subscribed to our newsletter.</p>
+              </div>
+            `,
+          };
+
+          // Send as multiple personalizations if large; simple send for now
+          await emailService.sendMultiple(msg);
+          console.log('Newsletter sent successfully');
+        }
+      } catch (mailErr) {
+        console.error('Newsletter send failed:', mailErr.code, mailErr.response?.body || mailErr.message);
+      }
+    }
 
     res.json({ success: true, message: "Blog added successfully" });
 
@@ -106,8 +153,45 @@ export const togglePublish = async (req, res) => {
     if (!blog) {
       return res.json({ success: false, message: "Blog not found" });
     }
+    const wasPublished = blog.isPublished;
     blog.isPublished = !blog.isPublished;
     await blog.save();
+
+    // If just published, send newsletter
+    if (!wasPublished && blog.isPublished) {
+      try {
+        const companyPattern = new RegExp(`^${escapeRegex(blog.company)}$`, 'i');
+        const subscribers = await EmailModel.find({ company: companyPattern }).lean();
+        const recipientEmails = subscribers.map(s => s.email).filter(Boolean);
+
+        console.log('Newsletter recipients (toggle):', recipientEmails.length, 'company:', blog.company);
+        if (recipientEmails.length > 0 && process.env.SMTP_USER) {
+          const siteBaseUrl = process.env.SITE_BASE_URL || 'https://example.com';
+          const blogUrl = `${siteBaseUrl}/blogs/${blog.slug}`;
+
+          const msg = {
+            to: recipientEmails,
+            from: process.env.FROM_EMAIL || 'no-reply@example.com',
+            subject: `New blog: ${blog.title}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                <h2 style="margin: 0 0 12px;">${blog.title}</h2>
+                <p style="margin: 0 0 12px;">${blog.description?.slice(0, 180) || ''}...</p>
+                <p style="margin: 0 0 12px;">
+                  <a href="${blogUrl}" target="_blank" rel="noopener noreferrer">Read the full post</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;"/>
+                <p style="font-size: 12px; color: #666;">You received this because you subscribed to our newsletter.</p>
+              </div>
+            `,
+          };
+
+          await emailService.sendMultiple(msg);
+        }
+      } catch (mailErr) {
+        console.error('Newsletter send failed on publish toggle:', mailErr.code, mailErr.response?.body || mailErr.message);
+      }
+    }
     res.json({ success: true, message: 'Blog status updated' });
   } catch (error) {
     console.error(error);
@@ -265,7 +349,7 @@ export const subscribeEmail = async (req, res) => {
       return res.json({ success: false, message: "Email already subscribed" });
     }
     
-    await EmailModel.create({ email });
+    await EmailModel.create({ email, company: 'QuoreB2B' });
     res.json({ success: true, msg: "Email subscribed successfully" });
   } catch (error) {
     console.error('Subscribe email error:', error);

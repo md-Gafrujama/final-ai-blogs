@@ -11,7 +11,7 @@ const Schema = new mongoose.Schema({
     },
     company:{
         type:String,
-        required:true
+        default:'QuoreB2B'
     }
 })
 

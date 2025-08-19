@@ -539,7 +539,7 @@ const NavbarNew = () => {
                   className='flex items-center justify-center gap-2 w-full rounded-full text-sm cursor-pointer bg-primary text-white px-6 py-3 hover:bg-primary-dark transition-all'
                 >
                   Login
-                  <img src={assets.arrow} className='w-3' alt="arrow" />
+                  <Image src={assets.arrow} className='w-3' alt="arrow" />
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import blogRouter from './lib/routes/blogRoute.js';
 import adminRouter from './lib/routes/adminRoute.js';
 import emailRouter from './lib/routes/emailRoute.js';
 import { ConnectDB } from './lib/config/db.js';
+import 'dotenv/config';
 
 const app = express();
 await ConnectDB();

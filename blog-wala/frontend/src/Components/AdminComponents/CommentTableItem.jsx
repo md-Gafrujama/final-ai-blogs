@@ -11,7 +11,8 @@ const CommentTableItem = ({ comment, fetchComments }) => {
 
     const approveComment = async () =>{
       try {
-        const {data} = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/approve-comment`, {id: _id})
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+        const {data} = await axios.post(`${baseURL}/api/admin/approve-comment`, {id: _id})
         if (data.success) {
           toast.success(data.message)
           fetchComments()
@@ -29,7 +30,8 @@ const CommentTableItem = ({ comment, fetchComments }) => {
         const confirm = window.confirm('Are you sure you want to delete this comment?');
         if(!confirm) return;
 
-        const {data} = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/delete-comment`, {id: _id})
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+        const {data} = await axios.post(`${baseURL}/api/admin/delete-comment`, {id: _id})
         if (data.success) {
           toast.success(data.message)
           fetchComments()

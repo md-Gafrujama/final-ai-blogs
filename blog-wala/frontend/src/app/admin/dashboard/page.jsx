@@ -4,7 +4,7 @@ import { assets, dashboard_data } from '@/Assets/assets'
 import BlogTableItem from '@/Components/AdminComponents/BlogTableItem'
 import { useAppContext } from '@/context/AppContext'
 import toast from 'react-hot-toast'
-const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
 
 const Dashboard = () => {
 

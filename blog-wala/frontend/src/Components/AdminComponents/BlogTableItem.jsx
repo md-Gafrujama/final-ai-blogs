@@ -13,7 +13,8 @@ const BlogTableItem = ({ blog, fetchBlogs, index }) => {
 
     const handlePublish = async () => {
       try {
-        const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/toggle-publish`, { id: blog._id });
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+        const { data } = await axios.post(`${baseURL}/api/blog/toggle-publish`, { id: blog._id });
         if (data.success) {
           toast.success('Blog published!');
           fetchBlogs();
@@ -26,7 +27,8 @@ const BlogTableItem = ({ blog, fetchBlogs, index }) => {
     };
     const handleUnpublish = async () => {
       try {
-        const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/toggle-publish`, { id: blog._id });
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+        const { data } = await axios.post(`${baseURL}/api/blog/toggle-publish`, { id: blog._id });
         if (data.success) {
           toast.success('Blog unpublished!');
           fetchBlogs();
@@ -40,7 +42,8 @@ const BlogTableItem = ({ blog, fetchBlogs, index }) => {
     const handleDelete = async () => {
       if (confirm('Are you sure you want to delete this blog?')) {
         try {
-          const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/delete`, { id: blog._id });
+          const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+          const { data } = await axios.post(`${baseURL}/api/blog/delete`, { id: blog._id });
           if (data.success) {
             toast.success('Blog deleted!');
             fetchBlogs();

@@ -170,7 +170,8 @@ const BlogList = () => {
   const fetchBlogs = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/all`);
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+      const response = await axios.get(`${baseURL}/api/blog/all`);
      
       const filteredBlogs = response.data.blogs.filter(blog => blog.company === 'QuoreB2B');
       setBlogs(filteredBlogs);

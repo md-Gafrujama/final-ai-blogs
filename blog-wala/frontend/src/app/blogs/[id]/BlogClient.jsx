@@ -77,7 +77,8 @@ const BlogClient = ({ slug }) => {
   const fetchBlogData = async () => {
     if (!slug) return;
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/slug/${slug}`);
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+      const response = await axios.get(`${baseURL}/api/blog/slug/${slug}`);
       if (response.data.success && response.data.blog && response.data.blog.company === "QuoreB2B") {
         setData(response.data.blog);
       } else {
@@ -94,7 +95,8 @@ const BlogClient = ({ slug }) => {
   const fetchComments = async () => {
     if (!slug) return;
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/comments`, { blogSlug: slug });
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+      const res = await axios.post(`${baseURL}/api/blog/comments`, { blogSlug: slug });
       if (res.data.success) setComments(res.data.comments);
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -107,7 +109,8 @@ const BlogClient = ({ slug }) => {
     if (!name.trim() || !content.trim()) return;
     setIsSubmitting(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/add-comment`, {
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+      const res = await axios.post(`${baseURL}/api/blog/add-comment`, {
         blog: data._id,
         name,
         content,
@@ -158,25 +161,33 @@ const BlogClient = ({ slug }) => {
   };
 
   // Email subscription handler
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    const trimmed = (email || '').trim();
+    if (!trimmed) {
+      toast.error('Please enter your email');
+      return;
+    }
+    setIsSubscribing(true);
     const formData = new FormData();
-    formData.append("email", email);
+    formData.append('email', trimmed);
     try {
-      const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
-      const response = await axios.post(`${baseURL}/api/email`, formData);
-      if (response.data.success) {
-        toast.success(response.data.msg);
-        setEmail("");
-        if (inputRef.current) {
-          inputRef.current.value = '';
-        }
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+      const { data } = await axios.post(`${baseURL}/api/email`, formData);
+      if (data?.success) {
+        toast.success(data.msg || 'Subscribed successfully');
+        setEmail('');
+        if (inputRef.current) inputRef.current.value = '';
       } else {
-        toast.error("Error");
+        toast.error(data?.message || 'Subscription failed');
       }
     } catch (error) {
-      toast.error("Error occurred while subscribing");
+      const apiMessage = error?.response?.data?.message;
+      toast.error(apiMessage || error.message || 'Error occurred while subscribing');
       console.error('Subscribe error:', error);
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
@@ -200,7 +211,8 @@ const BlogClient = ({ slug }) => {
     if (data && data.category) {
       const fetchRelated = async () => {
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/all`);
+          const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+          const response = await axios.get(`${baseURL}/api/blog/all`);
           if (response.data.success) {
             // Filter by same category, exclude current blog, limit to 3 and same company
             const related = response.data.blogs.filter(
@@ -310,15 +322,17 @@ const BlogClient = ({ slug }) => {
               onChange={(e) => setEmail(e.target.value)} 
               value={email} 
               type="email" 
+              name="email"
               placeholder='Enter your email' 
               required 
               className='w-full px-5 py-3 outline-none placeholder-gray-400 text-gray-700'
             />
             <button 
               type="submit" 
-              className='bg-gradient-to-r from-[#5044E5] to-[#5044E5] text-white px-6 py-3 font-medium hover:opacity-90 transition-opacity duration-200 flex items-center'
+              disabled={isSubscribing}
+              className='bg-gradient-to-r from-[#5044E5] to-[#5044E5] text-white px-6 py-3 font-medium hover:opacity-90 transition-opacity duration-200 flex items-center disabled:opacity-60 disabled:cursor-not-allowed'
             >
-              Subscribe
+              {isSubscribing ? 'Subscribing...' : 'Subscribe'}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>

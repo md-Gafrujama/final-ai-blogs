@@ -9,7 +9,7 @@ import parse from 'html-react-parser'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import { useRouter } from 'next/navigation';
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
 const Page = () => {
 const [isPublished, setIsPublished] = useState(false);
   const router = useRouter();
