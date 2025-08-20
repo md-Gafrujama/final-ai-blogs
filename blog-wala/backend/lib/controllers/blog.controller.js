@@ -67,7 +67,6 @@ export const addBlog = async (req, res) => {
         const recipientEmails = subscribers.map(s => s.email).filter(Boolean);
 
         console.log('📰 Newsletter recipients (create):', recipientEmails.length, 'company:', created.company);
-        console.log('📰 Recipient emails:', recipientEmails);
         console.log('📰 SMTP_USER configured:', !!process.env.SMTP_USER);
         console.log('📰 FROM_EMAIL configured:', !!process.env.FROM_EMAIL);
         
@@ -75,26 +74,47 @@ export const addBlog = async (req, res) => {
           const siteBaseUrl = process.env.SITE_BASE_URL || 'https://example.com';
           const blogUrl = `${siteBaseUrl}/blogs/${created.slug}`;
 
-          const msg = {
-            to: recipientEmails,
-            from: process.env.FROM_EMAIL || 'no-reply@example.com',
-            subject: `New blog: ${created.title}`,
-            html: `
-              <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                <h2 style="margin: 0 0 12px;">${created.title}</h2>
-                <p style="margin: 0 0 12px;">${created.description?.slice(0, 180) || ''}...</p>
-                <p style="margin: 0 0 12px;">
-                  <a href="${blogUrl}" target="_blank" rel="noopener noreferrer">Read the full post</a>
-                </p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;"/>
-                <p style="font-size: 12px; color: #666;">You received this because you subscribed to our newsletter.</p>
-              </div>
-            `,
-          };
+          // Send individual emails to each subscriber
+          for (const email of recipientEmails) {
+            try {
+              const msg = {
+                to: email,
+                from: process.env.FROM_EMAIL || 'no-reply@example.com',
+                subject: `New blog: ${created.title}`,
+                html: `
+                  <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <h2 style="margin: 0 0 12px;">${created.title}</h2>
+                    <p style="margin: 0 0 12px;">${created.description?.slice(0, 180) || ''}...</p>
+                    <p style="margin: 0 0 12px;">
+                      <a href="${blogUrl}" target="_blank" rel="noopener noreferrer">Read the full post</a>
+                    </p>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;"/>
+                    <p style="font-size: 12px; color: #666;">You received this because you subscribed to our newsletter.</p>
+                    <p style="font-size: 12px; color: #666;">
+                      <a href="${siteBaseUrl}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #666;">Unsubscribe</a>
+                    </p>
+                  </div>
+                `,
+              };
 
-          // Send as multiple personalizations if large; simple send for now
-          await emailService.sendMultiple(msg);
-          console.log('Newsletter sent successfully');
+              // Try different possible method names for sending emails
+              if (typeof emailService.sendMail === 'function') {
+                await emailService.sendMail(msg);
+              } else if (typeof emailService.send === 'function') {
+                await emailService.send(msg);
+              } else if (typeof emailService.sendMultiple === 'function') {
+                // If only sendMultiple is available, use it but with individual emails
+                await emailService.sendMultiple({...msg, to: [email]});
+              } else {
+                throw new Error('No valid email sending method found');
+              }
+              
+              console.log(`Newsletter sent to ${email}`);
+            } catch (mailErr) {
+              console.error(`Failed to send to ${email}:`, mailErr.message);
+            }
+          }
+          console.log('All newsletters sent successfully');
         }
       } catch (mailErr) {
         console.error('Newsletter send failed:', mailErr.code, mailErr.response?.body || mailErr.message);
@@ -169,24 +189,47 @@ export const togglePublish = async (req, res) => {
           const siteBaseUrl = process.env.SITE_BASE_URL || 'https://example.com';
           const blogUrl = `${siteBaseUrl}/blogs/${blog.slug}`;
 
-          const msg = {
-            to: recipientEmails,
-            from: process.env.FROM_EMAIL || 'no-reply@example.com',
-            subject: `New blog: ${blog.title}`,
-            html: `
-              <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                <h2 style="margin: 0 0 12px;">${blog.title}</h2>
-                <p style="margin: 0 0 12px;">${blog.description?.slice(0, 180) || ''}...</p>
-                <p style="margin: 0 0 12px;">
-                  <a href="${blogUrl}" target="_blank" rel="noopener noreferrer">Read the full post</a>
-                </p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;"/>
-                <p style="font-size: 12px; color: #666;">You received this because you subscribed to our newsletter.</p>
-              </div>
-            `,
-          };
+          // Send individual emails to each subscriber
+          for (const email of recipientEmails) {
+            try {
+              const msg = {
+                to: email,
+                from: process.env.FROM_EMAIL || 'no-reply@example.com',
+                subject: `New blog: ${blog.title}`,
+                html: `
+                  <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <h2 style="margin: 0 0 12px;">${blog.title}</h2>
+                    <p style="margin: 0 0 12px;">${blog.description?.slice(0, 180) || ''}...</p>
+                    <p style="margin: 0 0 12px;">
+                      <a href="${blogUrl}" target="_blank" rel="noopener noreferrer">Read the full post</a>
+                    </p>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;"/>
+                    <p style="font-size: 12px; color: #666;">You received this because you subscribed to our newsletter.</p>
+                    <p style="font-size: 12px; color: #666;">
+                      <a href="${siteBaseUrl}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #666;">Unsubscribe</a>
+                    </p>
+                  </div>
+                `,
+              };
 
-          await emailService.sendMultiple(msg);
+              // Try different possible method names for sending emails
+              if (typeof emailService.sendMail === 'function') {
+                await emailService.sendMail(msg);
+              } else if (typeof emailService.send === 'function') {
+                await emailService.send(msg);
+              } else if (typeof emailService.sendMultiple === 'function') {
+                // If only sendMultiple is available, use it but with individual emails
+                await emailService.sendMultiple({...msg, to: [email]});
+              } else {
+                throw new Error('No valid email sending method found');
+              }
+              
+              console.log(`Newsletter sent to ${email}`);
+            } catch (mailErr) {
+              console.error(`Failed to send to ${email}:`, mailErr.message);
+            }
+          }
+          console.log('All newsletters sent successfully');
         }
       } catch (mailErr) {
         console.error('Newsletter send failed on publish toggle:', mailErr.code, mailErr.response?.body || mailErr.message);
@@ -353,6 +396,27 @@ export const subscribeEmail = async (req, res) => {
     res.json({ success: true, msg: "Email subscribed successfully" });
   } catch (error) {
     console.error('Subscribe email error:', error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const unsubscribeEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+      return res.json({ success: false, message: "Email is required" });
+    }
+    
+    const result = await EmailModel.deleteOne({ email });
+    
+    if (result.deletedCount > 0) {
+      res.json({ success: true, message: "Successfully unsubscribed" });
+    } else {
+      res.json({ success: false, message: "Email not found in our subscription list" });
+    }
+  } catch (error) {
+    console.error('Unsubscribe error:', error);
     res.json({ success: false, message: error.message });
   }
 };
