@@ -2,6 +2,7 @@ import express from "express";
 import { addBlog, addComment, deleteBlogById, generateContent, getAllBlogs, getBlogById, getBlogComments, togglePublish, getBlogBySlug } from "../controllers/blog.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import auth from "../middlewares/auth.middleware.js";
+import cachedData from "../middlewares/redis.middleware.js";
 
 const blogRouter = express.Router();
 
@@ -12,7 +13,7 @@ blogRouter.get('/:blogId', getBlogById);
 blogRouter.post('/delete', auth, deleteBlogById);
 blogRouter.post('/toggle-publish', auth, togglePublish);
 blogRouter.post('/add-comment', addComment);
-blogRouter.post('/comments', getBlogComments);
+blogRouter.post('/comments',cachedData({key:"comments"}),  getBlogComments);
 
 blogRouter.post('/generate', auth, generateContent);
 
