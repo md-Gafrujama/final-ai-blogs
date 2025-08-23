@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import Blog from '../models/BlogModel.js';
 import Comment from '../models/CommentModel.js';
 import EmailModel from '../models/EmailModel.js';
+import redis from '../config/redis.js';
 
 export const adminLogin = async (req, res)=>{
     try {
@@ -18,7 +19,7 @@ export const adminLogin = async (req, res)=>{
     }
 }
 
-export const getAllBlogsAdmin = async (req, res) => {
+export const getAllBlogsAdmin = async (req,  res) => {
     try {
         const { company } = req.query; // Get company from query parameter
         let filter = {};
@@ -28,6 +29,7 @@ export const getAllBlogsAdmin = async (req, res) => {
         }
         
         const blogs = await Blog.find(filter).sort({createdAt: -1}).limit(5);
+        await redis.set("blogs",JSON.stringify(blogs),"EX",60 )
         res.json({success: true, blogs, company: company || 'all'})
     } catch (error) {
         res.json({success: false, message: error.message})

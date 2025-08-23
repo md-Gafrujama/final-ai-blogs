@@ -4,10 +4,16 @@ import blogRouter from './lib/routes/blogRoute.js';
 import adminRouter from './lib/routes/adminRoute.js';
 import emailRouter from './lib/routes/emailRoute.js';
 import { ConnectDB } from './lib/config/db.js';
+// import redis from './lib/config/redis.js';
 import 'dotenv/config';
 
+ConnectDB();
+
 const app = express();
-await ConnectDB();
+
+// redis.on("connect" , ()=>{
+//   console.log("redis connected successfully");
+// })
 
 app.use(cors());
 app.use(express.json());

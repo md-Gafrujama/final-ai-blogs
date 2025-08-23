@@ -1,8 +1,11 @@
 import express from "express";
 import { adminLogin, approveCommentById, deleteCommentById, getAllBlogsAdmin, getAllComments, getDashboard, getAllEmails, deleteEmailById } from "../controllers/admin.controller.js";
 import auth from "../middlewares/auth.middleware.js";
+//  import redis from "../config/redis.js";
 
 const adminRouter = express.Router();
+
+
 
 adminRouter.post("/login", adminLogin);
 adminRouter.get("/comments", auth, getAllComments);

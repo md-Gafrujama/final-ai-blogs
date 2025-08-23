@@ -5,6 +5,10 @@ import Comment from '../models/CommentModel.js';
 import EmailModel from '../models/EmailModel.js';
 import main from '../config/gemini.js';
 import emailService from '../config/nodemailer.js';
+import redis from '../config/redis.js'
+
+
+
 
 function escapeRegex(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -247,6 +251,8 @@ export const addComment = async (req, res) => {
     const { blog, name, content } = req.body;
     await Comment.create({ blog, name, content });
     res.json({ success: true, message: 'Comment added for review' });
+
+   
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });
@@ -255,13 +261,20 @@ export const addComment = async (req, res) => {
 
 export const getBlogComments = async (req, res) => {
   try {
+
     const { blogSlug } = req.body;
+
     const blog = await Blog.findOne({ slug: blogSlug });
     if (!blog) {
       return res.json({ success: false, message: "Blog not found" });
     }
+
     const comments = await Comment.find({ blog: blog._id, isApproved: true }).sort({ createdAt: -1 });
+
+    await redis.set("comments" , JSON.stringify(comments) , "EX",60);
+
     res.json({ success: true, comments });
+    
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });
