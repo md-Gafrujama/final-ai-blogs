@@ -7,7 +7,7 @@ import redis from "../../lib/config/redis.js";
     const data = await redis.get(key);
 
     if(data){
-      console.log("response from redis");
+         console.log("response from redis");
            res.send(JSON.parse(data));
     }
     else 

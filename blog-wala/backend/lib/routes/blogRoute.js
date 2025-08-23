@@ -3,14 +3,14 @@ import { addBlog, addComment, deleteBlogById, generateContent, getAllBlogs, getB
 import upload from "../middlewares/multer.middleware.js";
 import auth from "../middlewares/auth.middleware.js";
 import cachedData from "../middlewares/redis.middleware.js";
-import redis from "../config/redis.js";
+
 
 const blogRouter = express.Router();
 
 
 
 blogRouter.post("/add", upload.single('image'), auth, addBlog);
-blogRouter.get('/all', getAllBlogs);
+blogRouter.get('/all', cachedData("blogs"),  getAllBlogs);
 blogRouter.get('/slug/:slug', getBlogBySlug);
 blogRouter.get('/:blogId', getBlogById);
 blogRouter.post('/delete', auth, deleteBlogById);

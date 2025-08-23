@@ -135,7 +135,9 @@ export const addBlog = async (req, res) => {
 
 export const getAllBlogs = async (req, res) => {
   try {
+
     const blogs = await Blog.find({ isPublished: true }); // Only return published blogs for public API
+    redis.set("blogs" , JSON.stringify(blogs) , "EX", 60);
     res.json({ success: true, blogs });
   } catch (error) {
     console.error(error);
