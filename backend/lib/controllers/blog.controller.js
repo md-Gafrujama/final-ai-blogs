@@ -5,9 +5,8 @@ import Comment from '../models/CommentModel.js';
 import EmailModel from '../models/EmailModel.js';
 import main from '../config/gemini.js';
 import emailService from '../config/nodemailer.js';
-import {Redis} from 'ioredis';
-import cachedData from '../middlewares/redis.middleware.js';
-const redis = new Redis();
+import redis from '../config/redis.js'
+
 
 
 
@@ -270,8 +269,6 @@ export const getBlogComments = async (req, res) => {
       return res.json({ success: false, message: "Blog not found" });
     }
 
-   
-    
     const comments = await Comment.find({ blog: blog._id, isApproved: true }).sort({ createdAt: -1 });
 
     await redis.set("comments" , JSON.stringify(comments) , "EX",60);

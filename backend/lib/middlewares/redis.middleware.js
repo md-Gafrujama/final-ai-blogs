@@ -1,21 +1,20 @@
+import redis from "../../lib/config/redis.js";
 
-import redis from "../config/redis.js"
-const cachedData = ({key}) =>{
+  const cachedData = (key) => {
 
-    return async(req , resp , next) =>
-    {
-         const data = redis.get(key);
+   return  async(req,res,next)=>{
 
-         if(data)
-         {
-            console.log('response from redis');
-             resp.send(JSON.stringify(data));
-         }
+    const data = await redis.get(key);
 
-         else{
-            next();
-         }
+    if(data){
+      console.log("response from redis");
+           res.send(JSON.parse(data));
     }
+    else 
+    {
+        next();
+    }
+  }
 }
 
-export default cachedData ;
+export default cachedData;
