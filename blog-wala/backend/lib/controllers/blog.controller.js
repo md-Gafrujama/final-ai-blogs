@@ -135,15 +135,20 @@ export const addBlog = async (req, res) => {
 
 export const getAllBlogs = async (req, res) => {
   try {
+    const blogs = await Blog.find({ isPublished: true });
 
-    const blogs = await Blog.find({ isPublished: true }); // Only return published blogs for public API
-    redis.set("blogs" , JSON.stringify(blogs) , "EX", 60);
-    res.json({ success: true, blogs });
+    const responseData = { success: true, blogs };
+
+   
+    await redis.set("blogs", JSON.stringify(responseData), "EX", 60);
+
+    res.json(responseData);
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });
   }
 };
+
 
 export const getBlogById = async (req, res) => {
   try {
