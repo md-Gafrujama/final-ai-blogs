@@ -1,67 +1,127 @@
 "use client";
-import React, { useState } from 'react'
-import { useAppContext } from '@/context/AppContext'
-import toast from 'react-hot-toast';
-import {useRouter} from 'next/navigation';
-import PrivateComponent from '@/Components/privateComponent';
+import React, { useState } from "react";
+import { useAppContext } from "@/context/AppContext";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
 
 const Login = () => {
+  const { axios, setToken } = useAppContext();
+  const router = useRouter();
 
-    const {axios, setToken} = useAppContext();
-    const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("admin"); // default role = admin
 
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Dynamically set endpoint
+      const endpoint =
+        role === "admin"
+          ? `${baseUrl}/api/admin/login`
+          : `${baseUrl}/api/super-admin/login`;
 
-    const handleSubmit = async (e)=>{
-        e.preventDefault()
-        try {
-          const {data} = await axios.post(`${baseUrl}/api/admin/login`, {email, password});
+      const { data } = await axios.post(endpoint, { email, password });
 
-          if(data.success){
+      if (data.success) {
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("email", email);
+        axios.defaults.headers.common["Authorization"] = data.token;
 
-            setToken(data.token)
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('email',email)
-            axios.defaults.headers.common['Authorization'] = data.token;
-            router.push("/admin/dashboard");
-          }
-          else{
-            toast.error(data.message)
-          }
-        } catch (error) {
-          toast.error(error.message)
+        if (role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/super-admin/dashboard");
         }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
+  };
 
   return (
-  
-    <div className='flex items-center justify-center h-screen'>
-      <div className='w-full max-w-sm p-6 max-md:m-6 border border-[#5044E5]/30 shadow-xl shadow-[#5044E5]/15 rounded-lg'>
-        <div className='flex flex-col items-center justify-center'>
-            <div className='w-full py-6 text-center'>
-                <h1 className='text-3xl font-bold'><span className='text-[#5044E5]'>Admin</span> Login</h1>
-                <p className='font-light'>Enter your credentials to access the admin panel</p>
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-full max-w-sm p-6 max-md:m-6 border border-[#5044E5]/30 shadow-xl shadow-[#5044E5]/15 rounded-lg">
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-full py-6 text-center">
+            <h1 className="text-3xl font-bold">
+              <span className="text-[#5044E5]">{role === "admin" ? "Admin" : "Super Admin"}</span> Login
+            </h1>
+            <p className="font-light">
+              Enter your credentials to access the {role} panel
+            </p>
+          </div>
+          <form
+            onSubmit={handleSubmit}
+            className="mt-6 w-full sm:max-w-md text-gray-600"
+          >
+            {/* Role selection */}
+            <div className="flex gap-6 mb-6 justify-center">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="admin"
+                  checked={role === "admin"}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="accent-[#5044E5] w-4 h-4"
+                />
+                Admin
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="super-admin"
+                  checked={role === "super-admin"}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="accent-[#5044E5] w-4 h-4"
+                />
+                Super Admin
+              </label>
             </div>
-            <form onSubmit={handleSubmit} className='mt-6 w-full sm:max-w-md text-gray-600'>
-                <div className='flex flex-col'>
-                    <label> Email </label>
-                    <input onChange={e=> setEmail(e.target.value)} value={email} 
-                    type="email" required placeholder='your email id' className='border-b-2 border-gray-300 p-2 outline-none mb-6'/>
-                </div>
-                <div className='flex flex-col'>
-                    <label> Password </label>
-                    <input onChange={e=> setPassword(e.target.value)} value={password} 
-                    type="password" required placeholder='your password' className='border-b-2 border-gray-300 p-2 outline-none mb-6'/>
-                </div>
-                <button type="submit" className='w-full py-3 font-medium bg-[#5044E5] text-white rounded cursor-pointer hover:bg-[#5044E5]/90 transition-all'> Login </button>
-            </form>
+
+            {/* Email */}
+            <div className="flex flex-col">
+              <label>Email</label>
+              <input
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+                type="email"
+                required
+                placeholder="your email id"
+                className="border-b-2 border-gray-300 p-2 outline-none mb-6"
+              />
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col">
+              <label>Password</label>
+              <input
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                type="password"
+                required
+                placeholder="your password"
+                className="border-b-2 border-gray-300 p-2 outline-none mb-6"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full py-3 font-medium bg-[#5044E5] text-white rounded cursor-pointer hover:bg-[#5044E5]/90 transition-all"
+            >
+              Login
+            </button>
+          </form>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
