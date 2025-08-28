@@ -444,14 +444,14 @@ export const unsubscribeEmail = async (req, res) => {
 
 export const request = async (req, resp) => {
   try {
-    const { fullname, company, email } = req.body;
-    if (!fullname || !company || !email) {
+    const { fullname, company, email, password, businessType } = req.body;
+    if (!fullname || !company || !email || !password || !businessType) {
       return resp.status(400).json({ success: false, message: "Some required fields are missing" });
     }
-    const created = await Request.create({ fullname, company, email });
+    const created = await Request.create({ fullname, company, email, password, businessType });
     return resp.status(200).json({ success: true, message: "Your request has been sent successfully", data: created });
   } catch (error) {
     console.error('Request handler error:', error);
-    return resp.status(500).json({ success: false, message: error.message }); // <-- send real error
+    return resp.status(500).json({ success: false, message: error.message });
   }
 }
