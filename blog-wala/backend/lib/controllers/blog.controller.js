@@ -6,6 +6,7 @@ import EmailModel from '../models/EmailModel.js';
 import main from '../config/gemini.js';
 import emailService from '../config/nodemailer.js';
 import redis from '../config/redis.js'
+import Request from '../models/requestModel.js';
 
 
 
@@ -440,3 +441,17 @@ export const unsubscribeEmail = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+export const request = async (req, resp) => {
+  try {
+    const { fullname, company, email } = req.body;
+    if (!fullname || !company || !email) {
+      return resp.status(400).json({ success: false, message: "Some required fields are missing" });
+    }
+    const created = await Request.create({ fullname, company, email });
+    return resp.status(200).json({ success: true, message: "Your request has been sent successfully", data: created });
+  } catch (error) {
+    console.error('Request handler error:', error);
+    return resp.status(500).json({ success: false, message: error.message }); // <-- send real error
+  }
+}

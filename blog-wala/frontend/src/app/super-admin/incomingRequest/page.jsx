@@ -1,114 +1,33 @@
-// 'use client'
-
-// import { assets } from '@/Assets/assets'
-// import { useAppContext } from '@/context/AppContext'
-// import Image from 'next/image'
-// import React, { useEffect, useRef, useState } from 'react'
-// import { toast } from 'react-toastify'
-// import parse from 'html-react-parser'
-// import Quill from 'quill'
-// import 'quill/dist/quill.snow.css'
-// import { useRouter } from 'next/navigation';
-
-// const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
-
-// const Page = () => {
-//   const [status, setStatus] = useState('pending') // Default status
-
-//   const handleStatusChange = (e) => {
-//     setStatus(e.target.value)
-//     console.log('Status changed to:', e.target.value)
-//     // Add your logic here for handling accept/reject
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-blue-50 py-10 px-4 sm:px-10">
-//       <div className="max-w-md mx-auto">
-//         <div className="bg-white p-6 rounded-lg shadow-md">
-//           <label htmlFor="status-dropdown" className="block text-sm font-medium text-gray-700 mb-2">
-//             Status:
-//           </label>
-//           <select 
-//             id="status-dropdown"
-//             value={status}
-//             onChange={handleStatusChange}
-//             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-//           >
-//             <option value="pending">Pending</option>
-//             <option value="accept">Accept</option>
-//             <option value="reject">Reject</option>
-//           </select>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default Page
-
-
 'use client'
 
 import React, { useEffect, useState } from 'react'
 
-// Mock data for demonstration - replace with actual API calls
-const mockRegistrations = [
-  {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    companyName: 'Acme Corporation',
-    email: 'john@acme.com',
-    phone: '+1-555-0123',
-    businessType: 'Technology',
-    companyAddress: '123 Tech Street, Silicon Valley, CA 94000',
-    companyProfile: 'Acme Corporation is a leading technology company specializing in innovative software solutions. We provide cutting-edge applications and services to help businesses streamline their operations and improve efficiency.',
-    companyImage: null,
-    status: 'pending',
-    submittedAt: '2024-01-15T10:30:00Z',
-    reviewedAt: null,
-    reviewedBy: null
-  },
-  {
-    id: 2,
-    firstName: 'Jane',
-    lastName: 'Smith',
-    companyName: 'GreenTech Solutions',
-    email: 'jane@greentech.com',
-    phone: '+1-555-0124',
-    businessType: 'Healthcare',
-    companyAddress: '456 Green Avenue, Portland, OR 97201',
-    companyProfile: 'GreenTech Solutions focuses on sustainable healthcare technology. We develop eco-friendly medical devices and software that help healthcare providers reduce their environmental impact while maintaining high-quality patient care.',
-    companyImage: null,
-    status: 'pending',
-    submittedAt: '2024-01-16T14:20:00Z',
-    reviewedAt: null,
-    reviewedBy: null
-  },
-  {
-    id: 3,
-    firstName: 'Mike',
-    lastName: 'Johnson',
-    companyName: 'FinanceFlow Inc',
-    email: 'mike@financeflow.com',
-    phone: '+1-555-0125',
-    businessType: 'Finance',
-    companyAddress: '789 Wall Street, New York, NY 10005',
-    companyProfile: 'FinanceFlow Inc provides comprehensive financial management solutions for small and medium businesses. Our platform offers automated bookkeeping, financial reporting, and cash flow management tools.',
-    companyImage: null,
-    status: 'approved',
-    submittedAt: '2024-01-14T09:15:00Z',
-    reviewedAt: '2024-01-14T16:30:00Z',
-    reviewedBy: 'Admin User'
-  }
-]
+const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
 
 const SuperAdminPanel = () => {
-  const [registrations, setRegistrations] = useState(mockRegistrations)
+  const [registrations, setRegistrations] = useState([])
   const [selectedRegistration, setSelectedRegistration] = useState(null)
   const [filterStatus, setFilterStatus] = useState('all')
   const [isProcessing, setIsProcessing] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch registrations from API
+  useEffect(() => {
+    const fetchRegistrations = async () => {
+      try {
+        setLoading(true)
+        const res = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/super-admin/getRequests`)
+        const data = await res.json()
+        setRegistrations(Array.isArray(data) ? data : data.data || data || [])
+      } catch (err) {
+        setRegistrations([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchRegistrations()
+  }, [])
 
   // Filter registrations based on status
   const filteredRegistrations = registrations.filter(reg => 
@@ -116,6 +35,7 @@ const SuperAdminPanel = () => {
   )
 
   const formatDate = (dateString) => {
+    if (!dateString) return '-'
     return new Date(dateString).toLocaleString()
   }
 
@@ -139,14 +59,11 @@ const SuperAdminPanel = () => {
 
   const handleStatusChange = async (registrationId, newStatus, rejectionReason = '') => {
     setIsProcessing(true)
-    
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Update the registration status
       setRegistrations(prev => prev.map(reg => 
-        reg.id === registrationId 
+        (reg._id || reg.id) === registrationId 
           ? {
               ...reg, 
               status: newStatus,
@@ -156,15 +73,10 @@ const SuperAdminPanel = () => {
             }
           : reg
       ))
-
-      // Close modal and clear selection
       setShowModal(false)
       setSelectedRegistration(null)
-      
-      // Show success message
       const statusText = newStatus === 'approved' ? 'approved' : 'rejected'
       alert(`Registration ${statusText} successfully! Email notification sent to applicant.`)
-      
     } catch (error) {
       console.error('Error updating status:', error)
       alert('Error updating registration status. Please try again.')
@@ -187,13 +99,13 @@ const SuperAdminPanel = () => {
     const handleAction = (action) => {
       setActionType(action)
       if (action === 'approve') {
-        handleStatusChange(selectedRegistration.id, 'approved')
+        handleStatusChange(selectedRegistration._id || selectedRegistration.id, 'approved')
       } else if (action === 'reject') {
         if (!rejectionReason.trim()) {
           alert('Please provide a reason for rejection')
           return
         }
-        handleStatusChange(selectedRegistration.id, 'rejected', rejectionReason)
+        handleStatusChange(selectedRegistration._id || selectedRegistration.id, 'rejected', rejectionReason)
       }
     }
 
@@ -218,7 +130,7 @@ const SuperAdminPanel = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Current Status:</span>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedRegistration.status)}`}>
-                  {getStatusIcon(selectedRegistration.status)} {selectedRegistration.status.charAt(0).toUpperCase() + selectedRegistration.status.slice(1)}
+                  {getStatusIcon(selectedRegistration.status)} {selectedRegistration.status ? selectedRegistration.status.charAt(0).toUpperCase() + selectedRegistration.status.slice(1) : '-'}
                 </span>
               </div>
             </div>
@@ -231,9 +143,9 @@ const SuperAdminPanel = () => {
                   Personal Information
                 </h3>
                 <div className="space-y-2 text-sm">
-                  <div><span className="font-medium">Name:</span> {selectedRegistration.firstName} {selectedRegistration.lastName}</div>
+                  <div><span className="font-medium">Name:</span> {selectedRegistration.fullname}</div>
                   <div><span className="font-medium">Email:</span> {selectedRegistration.email}</div>
-                  <div><span className="font-medium">Phone:</span> {selectedRegistration.phone}</div>
+                  {/* If you add phone in your model, show it here */}
                 </div>
               </div>
 
@@ -243,37 +155,17 @@ const SuperAdminPanel = () => {
                   Company Information
                 </h3>
                 <div className="space-y-2 text-sm">
-                  <div><span className="font-medium">Company:</span> {selectedRegistration.companyName}</div>
+                  <div><span className="font-medium">Company:</span> {selectedRegistration.company}</div>
                   <div><span className="font-medium">Business Type:</span> {selectedRegistration.businessType}</div>
-                  <div><span className="font-medium">Submitted:</span> {formatDate(selectedRegistration.submittedAt)}</div>
+                  <div><span className="font-medium">Submitted:</span> {formatDate(selectedRegistration.createdAt)}</div>
                 </div>
               </div>
-            </div>
-
-            {/* Company Address */}
-            <div className="bg-purple-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <span className="mr-2">📍</span>
-                Company Address
-              </h3>
-              <p className="text-sm text-gray-700">{selectedRegistration.companyAddress}</p>
-            </div>
-
-            {/* Company Profile */}
-            <div className="bg-yellow-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <span className="mr-2">📋</span>
-                Company Profile
-              </h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{selectedRegistration.companyProfile}</p>
             </div>
 
             {/* Action Section - Only show for pending registrations */}
             {selectedRegistration.status === 'pending' && (
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-4">Take Action</h3>
-                
-                {/* Rejection Reason (show when rejecting) */}
                 <div className="mb-4">
                   <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 mb-2">
                     Reason for Rejection (required if rejecting):
@@ -287,8 +179,6 @@ const SuperAdminPanel = () => {
                     placeholder="Please provide a detailed reason for rejection..."
                   />
                 </div>
-
-                {/* Action Buttons */}
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleAction('approve')}
@@ -307,7 +197,6 @@ const SuperAdminPanel = () => {
                       </>
                     )}
                   </button>
-                  
                   <button
                     onClick={() => handleAction('reject')}
                     disabled={isProcessing}
@@ -436,7 +325,9 @@ const SuperAdminPanel = () => {
 
         {/* Registrations List */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          {filteredRegistrations.length === 0 ? (
+          {loading ? (
+            <div className="p-12 text-center text-lg text-gray-500">Loading...</div>
+          ) : filteredRegistrations.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-4xl mb-4">📭</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No registrations found</h3>
@@ -469,33 +360,33 @@ const SuperAdminPanel = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredRegistrations.map((registration) => (
-                    <tr key={registration.id} className="hover:bg-gray-50">
+                    <tr key={registration._id || registration.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {registration.companyName}
+                            {registration.company}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {registration.firstName} {registration.lastName}
+                            {registration.fullname}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{registration.email}</div>
-                        <div className="text-sm text-gray-500">{registration.phone}</div>
+                        {/* <div className="text-sm text-gray-500">{registration.phone || '-'}</div> */}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                          {registration.businessType}
+                          {registration.businessType || '-'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(registration.status)}`}>
-                          {getStatusIcon(registration.status)} {registration.status.charAt(0).toUpperCase() + registration.status.slice(1)}
+                          {getStatusIcon(registration.status)} {registration.status ? registration.status.charAt(0).toUpperCase() + registration.status.slice(1) : '-'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(registration.submittedAt)}
+                        {formatDate(registration.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button

@@ -1,8 +1,9 @@
 import express from "express";
-import { addBlog, addComment, deleteBlogById, generateContent, getAllBlogs, getBlogById, getBlogComments, togglePublish, getBlogBySlug } from "../controllers/blog.controller.js";
+import { request, addBlog, addComment, deleteBlogById, generateContent, getAllBlogs, getBlogById, getBlogComments, togglePublish, getBlogBySlug } from "../controllers/blog.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import auth from "../middlewares/auth.middleware.js";
 import cachedData from "../middlewares/redis.middleware.js";
+
 
 
 const blogRouter = express.Router();
@@ -17,6 +18,7 @@ blogRouter.post('/delete', auth, deleteBlogById);
 blogRouter.post('/toggle-publish', auth, togglePublish);
 blogRouter.post('/add-comment', addComment);
 blogRouter.post('/comments',cachedData("comments"),  getBlogComments);
+blogRouter.post('/request' ,  request);
 
 
 blogRouter.post('/generate', auth, generateContent);

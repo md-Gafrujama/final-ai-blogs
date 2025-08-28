@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import SuperAdmin from "../models/SuperAdminModel.js";
 import Blog from "../models/BlogModel.js";
+import Request from "../models/requestModel.js"
 
-// ✅ Super Admin Signup
+//  Super Admin Signup
 export const superAdminSignup = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -13,7 +14,7 @@ export const superAdminSignup = async (req, res) => {
       return res.json({ success: false, message: "Super admin already exists" });
     }
 
-    // Store plain password (⚠️ not secure, just for demo)
+    // Store plain password (not secure, just for demo)
     await SuperAdmin.create({ email, password });
 
     res.json({ success: true, message: "Super admin registered successfully" });
@@ -22,7 +23,7 @@ export const superAdminSignup = async (req, res) => {
   }
 };
 
-// ✅ Super Admin Login
+//  Super Admin Login
 export const superAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,3 +68,20 @@ export const getCompanyWiseBlogCount = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+export const getRequests = async(req , resp) => {
+ 
+  try{
+       const data = await Request.find();
+       
+       if(!data) {
+           resp.json({message:"error while fetching"});
+       }
+       else {
+        resp.json(data);
+       }
+  } catch{
+          resp.send({error:error.message , message:"nhi ho paya kaam"});
+  }
+  
+}
