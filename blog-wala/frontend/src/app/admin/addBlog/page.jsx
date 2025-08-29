@@ -10,8 +10,9 @@ import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import { useRouter } from 'next/navigation';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+
 const Page = () => {
-const [isPublished, setIsPublished] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
   const router = useRouter();
   const { axios } = useAppContext()
   const editorRef = useRef(null)
@@ -25,8 +26,10 @@ const [isPublished, setIsPublished] = useState(false);
     category: 'ABM',
     author: 'Alex Bennett',
     authorImg: '/author_img.png',
-    company: 'QuoreB2B',
+    company: '',
   })
+
+  const [approvedCompanies, setApprovedCompanies] = useState([])
 
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
@@ -43,7 +46,6 @@ const [isPublished, setIsPublished] = useState(false);
           ]
         }
       })
-      
       // Add rich-text class to the editor for proper styling
       const editorElement = editorRef.current.querySelector('.ql-editor');
       if (editorElement) {
@@ -51,6 +53,26 @@ const [isPublished, setIsPublished] = useState(false);
       }
     }
   }, [])
+
+  // Fetch approved companies
+  useEffect(() => {
+    const fetchApprovedCompanies = async () => {
+      try {
+        const res = await axios.get(`${baseUrl}/api/super-admin/getRequests`)
+        const data = res.data
+        let companies = []
+        if (Array.isArray(data)) {
+          companies = data.filter(c => c.status === "approved")
+        } else if (Array.isArray(data.data)) {
+          companies = data.data.filter(c => c.status === "approved")
+        }
+        setApprovedCompanies(companies)
+      } catch (error) {
+        setApprovedCompanies([])
+      }
+    }
+    fetchApprovedCompanies()
+  }, [axios])
 
   const generateContent = async () => {
     if (!data.title) {
@@ -71,17 +93,14 @@ const [isPublished, setIsPublished] = useState(false);
           },
         }
       );
-      console.log(response);
       if (response.data.success) {
         // Set HTML content and ensure proper styling
         quillRef.current.root.innerHTML = response.data.content;
-        
         // Add rich-text class to ensure proper styling
         const editorElement = editorRef.current.querySelector('.ql-editor');
         if (editorElement && !editorElement.classList.contains('rich-text')) {
           editorElement.classList.add('rich-text');
         }
-        
         toast.success('AI content generated successfully!');
       } else {
         toast.error(response.data.message || 'Failed to generate content');
@@ -102,9 +121,7 @@ const [isPublished, setIsPublished] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    console.log("Submitting...");
-
-    if (!data.title || !data.category || !data.author || !image) {
+    if (!data.title || !data.category || !data.author || !image || !data.company) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -120,12 +137,10 @@ const [isPublished, setIsPublished] = useState(false);
     formData.append('company', data.company);
 
     try {
-      console.log("Before API call");
+      setLoading(true)
       const response = await axios.post(`${baseUrl}/api/blog/add`, formData);
-      console.log("After API call", response);
       if (response.data.success) {
         toast.success('Blog added successfully!');
-        // Add a small delay before navigation to ensure toast is visible
         setTimeout(() => {
           router.push('/admin/blogList');
         }, 1500);
@@ -135,6 +150,8 @@ const [isPublished, setIsPublished] = useState(false);
     } catch (error) {
       console.error('Submit error:', error);
       toast.error(error?.response?.data?.message || error.message || 'Failed to add blog');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -193,13 +210,11 @@ const [isPublished, setIsPublished] = useState(false);
         <p className="text-lg font-medium text-gray-700 mt-6">Blog Description</p>
         <div className="max-w-xl min-h-[300px] relative mt-2 rounded-lg border border-gray-300 px-3 py-3">
           <div ref={editorRef}></div>
-
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-lg">
               <div className="w-8 h-8 rounded-full border-2 border-t-white animate-spin"></div>
             </div>
           )}
-
           <button
             disabled={loading}
             type="button"
@@ -226,37 +241,52 @@ const [isPublished, setIsPublished] = useState(false);
           <option value="Sales">Sales</option>
         </select>
 
+        {/* Approved Companies Dropdown */}
         <p className="text-lg font-medium text-gray-700 mt-6">Company</p>
         <select
           name="company"
           onChange={onChangeHandler}
           value={data.company}
           className="w-40 mt-2 px-4 py-3 border border-gray-300 rounded-lg text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 hover:border-blue-400 hover:shadow-lg hover:bg-blue-50 transition-all duration-300 ease-in-out"
+          required
         >
-          <option value="QuoreB2B">QuoreB2B</option>
-          <option value="Compare Bazar">Compare Bazar</option>
-           <option value="PresonifindB2B">PresonifindB2B</option>
-          <option value="Other">Other</option>
+          <option value="">Select Company</option>
+          {approvedCompanies.map(company => (
+            <option key={company._id} value={company.company}>
+              {company.company}
+            </option>
+          ))}
         </select>
 
-{/* Publish Now Checkbox */}
-<div className="flex gap-2 mt-4 items-center">
-  <input
-    type="checkbox"
-    id="publish"
-    checked={isPublished}
-    onChange={e => setIsPublished(e.target.checked)}
-    className="scale-125 cursor-pointer"
-  />
-  <label htmlFor="publish" className="text-gray-700">Publish Now</label>
-</div>
+        {/* Publish Now Checkbox */}
+        <div className="flex gap-2 mt-4 items-center">
+          <input
+            type="checkbox"
+            id="publish"
+            checked={isPublished}
+            onChange={e => setIsPublished(e.target.checked)}
+            className="scale-125 cursor-pointer"
+          />
+          <label htmlFor="publish" className="text-gray-700">Publish Now</label>
+        </div>
 
         {/* Submit Button */}
         <button
           type="submit"
           className="mt-8 w-40 h-10 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-lg transition-all shadow"
+          disabled={loading}
         >
-          Add Blog
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v16a8 8 0 01-8-8z"></path>
+              </svg>
+              Submitting...
+            </span>
+          ) : (
+            "Add Blog"
+          )}
         </button>
       </form>
     </div>

@@ -15,6 +15,8 @@ const Dashboard = () => {
     })
 
     const [companySorting, setCompanySorting] = useState('alphabetical')
+    const [approvedCompanies, setApprovedCompanies] = useState([])
+    const [selectedCompany, setSelectedCompany] = useState('')
     const { axios } = useAppContext()
 
     const fetchDashboard = async () => {
@@ -26,10 +28,25 @@ const Dashboard = () => {
         }
     }
 
-    const handleSortingChange = (e) => {
-        setCompanySorting(e.target.value)
-        // You can add sorting logic here based on the selected option
-        console.log('Sorting changed to:', e.target.value)
+    // Fetch approved companies
+    const fetchApprovedCompanies = async () => {
+        try {
+            const res = await axios.get(`${baseURL}/api/super-admin/getRequests`)
+            const data = res.data
+            if (Array.isArray(data)) {
+                setApprovedCompanies(data.filter(c => c.status === "approved"))
+            } else if (Array.isArray(data.data)) {
+                setApprovedCompanies(data.data.filter(c => c.status === "approved"))
+            } else {
+                setApprovedCompanies([])
+            }
+        } catch (error) {
+            setApprovedCompanies([])
+        }
+    }
+
+    const handleCompanyChange = (e) => {
+        setSelectedCompany(e.target.value)
     }
 
     // Get company count from companyBlogCounts object
@@ -37,8 +54,15 @@ const Dashboard = () => {
         return Object.keys(dashboardData.companyBlogCounts || {}).length
     }
 
+    // Get blog count for selected company
+    const getSelectedCompanyBlogCount = () => {
+        if (!selectedCompany) return '';
+        return dashboardData.companyBlogCounts[selectedCompany] || 0;
+    }
+
     useEffect(() => {
         fetchDashboard()
+        fetchApprovedCompanies()
     }, [])
 
     return (
@@ -48,8 +72,8 @@ const Dashboard = () => {
                 <div className='flex items-center gap-4 bg-white p-4 min-w-58 rounded shadow cursor-pointer hover:scale-105 transition-all'>
                     <img src={assets.dashboard_icon_1} alt="" />
                     <div>
-                        <p className='text-xl font-semibold text-gray-600'>{dashboardData.blogs}</p>
-                        <p className='text-gray-400 font-light'>Total Number of Companies</p>
+                        <p className='text-xl font-semibold text-gray-600'>{approvedCompanies.length}</p>
+                        <p className='text-gray-400 font-light'>Total Approved Companies</p>
                     </div>
                 </div>
 
@@ -57,8 +81,12 @@ const Dashboard = () => {
                 <div className='flex items-center gap-4 bg-white p-4 min-w-58 rounded shadow cursor-pointer hover:scale-105 transition-all'>
                     <img src={assets.dashboard_icon_2} alt="" />
                     <div>
-                        <p className='text-xl font-semibold text-gray-600'>{dashboardData.comments}</p>
-                        <p className='text-gray-400 font-light'>Blogs Count</p>
+                        <p className='text-xl font-semibold text-gray-600'>
+                            {selectedCompany ? getSelectedCompanyBlogCount() : dashboardData.comments}
+                        </p>
+                        <p className='text-gray-400 font-light'>
+                            {selectedCompany ? `Blogs for ${selectedCompany}` : 'Blogs Count'}
+                        </p>
                     </div>
                 </div>
 
@@ -66,27 +94,28 @@ const Dashboard = () => {
                 <div className='bg-white p-4 min-w-58 rounded shadow hover:shadow-lg transition-all'>
                     <div className='flex items-center gap-3 mb-3'>
                         <div>
-                            <p className='text-xl font-semibold text-gray-600'>{getCompanyCount()}</p>
+                            <p className='text-xl font-semibold text-gray-600'>{approvedCompanies.length}</p>
                             <p className='text-gray-400 font-light'>Active Companies</p>
                         </div>
                     </div>
                     
-                    <div className='mt-3'>
-                        <label htmlFor="company-sort" className='block text-sm font-medium text-gray-600 mb-2'>
-                            Company Sorting:
+                    {/* Approved Companies Dropdown */}
+                    <div className='mt-6'>
+                        <label htmlFor="approved-companies" className='block text-sm font-medium text-gray-600 mb-2'>
+                            Approved Companies:
                         </label>
-                        <select 
-                            id="company-sort"
-                            value={companySorting}
-                            onChange={handleSortingChange}
+                        <select
+                            id="approved-companies"
                             className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white'
+                            value={selectedCompany}
+                            onChange={handleCompanyChange}
                         >
-                            <option value="alphabetical">Alphabetical (A-Z)</option>
-                            <option value="alphabetical-desc">Alphabetical (Z-A)</option>
-                            <option value="blog-count-asc">Blog Count (Low to High)</option>
-                            <option value="blog-count-desc">Blog Count (High to Low)</option>
-                            <option value="recent">Recently Added</option>
-                            <option value="oldest">Oldest First</option>
+                            <option value="">Select a company</option>
+                            {approvedCompanies.map(company => (
+                                <option key={company._id} value={company.company}>
+                                    {company.company}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>

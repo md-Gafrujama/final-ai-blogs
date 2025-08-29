@@ -9,31 +9,29 @@ const ListBlog = () => {
   const [blogs, setBlogs] = useState([]);
   const { axios } = useAppContext();
 
+  // Fetch blogs for company "Zto"
   const fetchBlogs = async () => {
     try {
-      const token = localStorage.getItem('token'); 
-
-             const { data } = await axios.get(`${baseURL}/api/admin/blogs?company=QuoreB2B`, {
-         headers: {
-           Authorization: `Bearer ${token}`,
-         },
-       });
-      console.log('API response:', data);
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(`${baseURL}/api/admin/blogs?company=QuoreB2B`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (data.success) {
-        // Sort blogs by createdAt in descending order (newest first)
         const sortedBlogs = data.blogs.sort((a, b) => {
           const dateA = new Date(a.createdAt || a.date);
           const dateB = new Date(b.createdAt || b.date);
           return dateB - dateA;
         });
         setBlogs(sortedBlogs);
-        console.log('Blogs set:', sortedBlogs);
       } else {
         toast.error(data.message || 'Failed to fetch blogs');
+        setBlogs([]);
       }
     } catch (error) {
       toast.error(error.message);
-      console.error('Fetch blogs error:', error);
+      setBlogs([]);
     }
   };
 
@@ -43,7 +41,7 @@ const ListBlog = () => {
 
   return (
     <div className='flex-1 pt-5 px-5 sm:pt-12 sm:pl-16 bg-blue-50/50'>
-      <h1>All blogs</h1>
+      <h1>All blogs for company specific</h1>
       <div className='relative h-4/5 mt-4 max-w-4xl overflow-x-auto shadow rounded-lg scrollbar-hide bg-white'>
         <table className='w-full text-sm text-gray-500'>
           <thead className='text-xs text-gray-600 text-left uppercase'>
@@ -61,7 +59,6 @@ const ListBlog = () => {
                 try {
                   return <BlogTableItem key={blog._id} blog={blog} fetchBlogs={fetchBlogs} index={index + 1} />;
                 } catch (err) {
-                  console.error('BlogTableItem render error:', err, blog);
                   return <tr key={blog._id}><td colSpan={5}>Error rendering blog: {blog.title}</td></tr>;
                 }
               })
