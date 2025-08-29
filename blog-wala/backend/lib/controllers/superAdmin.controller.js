@@ -3,18 +3,17 @@ import SuperAdmin from "../models/SuperAdminModel.js";
 import Blog from "../models/BlogModel.js";
 import Request from "../models/requestModel.js"
 
-//  Super Admin Signup
+
 export const superAdminSignup = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if already exists
     const existing = await SuperAdmin.findOne({ email });
     if (existing) {
       return res.json({ success: false, message: "Super admin already exists" });
     }
 
-    // Store plain password (not secure, just for demo)
+  
     await SuperAdmin.create({ email, password });
 
     res.json({ success: true, message: "Super admin registered successfully" });
@@ -23,7 +22,6 @@ export const superAdminSignup = async (req, res) => {
   }
 };
 
-//  Super Admin Login
 export const superAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,7 +31,7 @@ export const superAdminLogin = async (req, res) => {
       return res.json({ success: false, message: "Invalid credentials" });
     }
 
-    // Compare plain password
+  
     if (password !== superAdmin.password) {
       return res.json({ success: false, message: "Invalid credentials" });
     }
@@ -51,7 +49,7 @@ export const superAdminLogin = async (req, res) => {
   }
 };
 
-// ✅ Get Blog Count Company-wise
+// Get Blog Count Company-wise
 export const getCompanyWiseBlogCount = async (req, res) => {
   try {
     const companyCounts = await Blog.aggregate([
@@ -85,3 +83,17 @@ export const getRequests = async(req , resp) => {
   }
   
 }
+
+export const approveRequest = async(req , resp) => {
+  try{
+    const {id} = req.params;
+    const {status} = req.body;
+
+    const request = await Request.findByIdAndUpdate(id , {status} , {new:true});
+
+    resp.json({success:true , message:"Request approved successfully" , request});
+  } catch(error){
+    resp.json({success:false , message:error.message});
+  }
+}
+  

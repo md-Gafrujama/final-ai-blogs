@@ -60,23 +60,26 @@ const SuperAdminPanel = () => {
   const handleStatusChange = async (registrationId, newStatus, rejectionReason = '') => {
     setIsProcessing(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setRegistrations(prev => prev.map(reg => 
-        (reg._id || reg.id) === registrationId 
-          ? {
-              ...reg, 
-              status: newStatus,
-              reviewedAt: new Date().toISOString(),
-              reviewedBy: 'Current Admin',
-              rejectionReason: newStatus === 'rejected' ? rejectionReason : undefined
-            }
-          : reg
-      ))
-      setShowModal(false)
-      setSelectedRegistration(null)
-      const statusText = newStatus === 'approved' ? 'approved' : 'rejected'
-      alert(`Registration ${statusText} successfully! Email notification sent to applicant.`)
+      const res = await fetch(
+        `${NEXT_PUBLIC_BASE_URL}/api/super-admin/approveRequest/${registrationId}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus, rejectionReason }),
+        }
+      )
+      const data = await res.json()
+      if (data.success) {
+        // Optionally, refetch registrations from server for up-to-date data
+        const refreshed = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/super-admin/getRequests`)
+        const refreshedData = await refreshed.json()
+        setRegistrations(Array.isArray(refreshedData) ? refreshedData : refreshedData.data || refreshedData || [])
+        setShowModal(false)
+        setSelectedRegistration(null)
+        alert(`Registration ${newStatus} successfully!`)
+      } else {
+        alert(data.message || 'Failed to update status')
+      }
     } catch (error) {
       console.error('Error updating status:', error)
       alert('Error updating registration status. Please try again.')
